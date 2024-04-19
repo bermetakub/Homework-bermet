@@ -1,8 +1,8 @@
 locals {
   security_group = {
-    first_sg = 22
-    second_sg = 80
-    third_sg = 443
+    first_sg = [22]
+    second_sg = [80]
+    third_sg = [22, 80, 443]
   }
   instances = {
     first = {
@@ -24,10 +24,12 @@ resource "aws_security_group" "sg" {
     name = each.key
     vpc_id = data.terraform_remote_state.networking.outputs.vpc
     dynamic "ingress" {
-      for_each = local.security_group
+      # for_each = local.security_group
+      #for_each = each.value == local.security_group.third_sg ? local.security_group.third_sg : []
+      for_each = each.value
       content {
-       from_port = each.value
-       to_port = each.value
+       from_port = ingress.value
+       to_port = ingress.value
        cidr_blocks = ["0.0.0.0/0"]
        protocol = "tcp"
       }
